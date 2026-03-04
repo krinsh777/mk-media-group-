@@ -840,7 +840,6 @@ address i {
 
 /* About Owner & Intro Section */
 .about-mkmedia {
-    background: linear-gradient(135deg, #141313 0%, #ca0000 100%);
     padding: 60px 0;
     margin: 30px 0;
     border-radius: 20px;
@@ -1264,4 +1263,5 @@ address i {
         padding: 30px 25px;
         font-size: 1.1rem;
     }
+
 }
