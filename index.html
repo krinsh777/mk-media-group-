@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en-US">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name='robots' content='index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1' />
+
+    <title>MK Media - News Portal</title>
+    <meta property="og:title" content="MK Media - News Portal" />
+    <meta property="og:description"
+        content="Breaking news, latest updates, politics, society, national, international, interviews, opinions, economy, sports, health, videos, photo features, entertainment, arts" />
+    <meta property="og:url" content="https://mkmediagroup.vercel.app/" />
+    <meta property="og:site_name" content="MK Media" />
+    <meta property="og:image" content="https://mkmediagroup.vercel.app/images/logo.png" />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Mukta:400,600,700&family=Outfit:wght@300;400;600;700&display=swap">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+</head>
+
+<body>
+    <div id="preloader">
+        <div class="loader-pulse"></div>
+    </div>
+    <div id="scroll-progress"></div>
+    <header class="site-header">
+        <div class="header-top">
+            <div class="container">
+                <div class="logo">
+                    <a href="index.html">
+                        <img src="images/logo.png" alt="MK Media">
+                    </a>
+                </div>
+                <div class="header-info">
+                    <span class="nepali-date" id="nepali-date-display">बुधबार, फागुन २१, २०८१</span>
+                    <span class="english-date" id="current-date">Wed, March 5, 2026</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile-specific action bar seen in reference pic -->
+        <div class="mobile-action-bar">
+            <div class="menu-trigger">
+                <i class="fas fa-bars"></i>
+            </div>
+            <div class="action-icons">
+                <div class="theme-toggle" id="theme-toggle-btn"><i class="fas fa-moon"></i></div>
+                <div class="lang-switch"><sup>'</sup>A<sup>'</sup></div>
+                <div class="epaper-icon"><i class="far fa-newspaper"></i></div>
+            </div>
+        </div>
+
+        <nav class="main-navigation">
+            <div class="container" style="justify-content: center; position: relative;">
+                <ul class="menu">
+                    <li><a href="index.html">होमपेज</a></li>
+                    <li><a href="#section-society">समाज</a></li>
+                    <li><a href="#section-politics">राजनीति</a></li>
+                    <li><a href="#section-national">राष्ट्रिय</a></li>
+                    <li><a href="#section-international">विदेश</a></li>
+                    <li><a href="#section-sports">खेलकुल</a></li>
+                    <li><a href="admin.html" class="admin-link"><i class="fas fa-user-shield"></i> Admin</a></li>
+                    <li class="desktop-theme-toggle">
+                        <div class="theme-toggle" id="theme-toggle-desktop"><i class="fas fa-moon"></i></div>
+                    </li>
+                </ul>
+                <div class="nav-search" style="position: absolute; right: 15px;">
+                    <i class="fas fa-search"></i>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main class="main-content">
+        <div class="container">
+            <section class="breaking-news">
+                <div class="breaking-label">ब्रेकिङ:</div>
+                <div class="breaking-content">
+                    <marquee behavior="scroll" direction="left" onmouseover="this.stop();" onmouseout="this.start();">
+                        लोड हुँदैछ...
+                    </marquee>
+                </div>
+            </section>
+
+            <!-- Video Section (Mirrors Reference Site) -->
+            <section class="video-section-container">
+                <div class="video-main">
+                    <div class="video-wrapper">
+                        <video id="featured-video" autoplay muted loop playsinline>
+                            <source src="images/slider1.mp4" type="video/mp4">
+                        </video>
+                    </div>
+                </div>
+                <div class="video-sidebar">
+                    <div class="loading">भिडियो लोड हुँदैछ...</div>
+                </div>
+            </section>
+
+            <!-- MK Media Introduction & Owner Section -->
+            <section id="about-section" class="about-mkmedia fade-in">
+                <div class="about-wrapper">
+                    <div class="owner-card">
+                        <img src="images/owner.jpg" alt="Owner" class="owner-image">
+                        <h3 class="owner-name">Aesthetic Prince</h3>
+                        <p class="owner-title">Founder & Chairperson</p>
+                    </div>
+                    <div class="intro-content">
+                        <h2>एमके मिडिया (MK Media) मा स्वागत छ</h2>
+                        <p>एमके मिडिया एक भरपर्दो र गतिशील डिजिटल समाचार प्लेटफर्म हो जुन समाजमा निष्पक्ष र ताजा समाचार
+                            पुर्याउन समर्पित छ। हामी बर्दिबास लगायत देशभरिका महत्वपूर्ण घटनाहरु, राजनीति, समाज, खेलकुद र
+                            मनोरन्जनका क्षेत्रमा गहिरो विश्लेषण र प्रत्यक्ष रिपोर्टिङ प्रदान गर्दछौं। हाम्रो मुख्य
+                            उद्देश्य सत्यतथ्य जानकारीको माध्यमबाट नागरिकलाई सुसूचित गराउनु हो।</p>
+                        <p>हामी विश्वास गर्दछौं कि सही सूचना नै सशक्त समाजको आधार हो। त्यसैले, हामी २४सै घण्टा ताजा
+                            अपडेटहरुका साथ तपाईंसँग जोडिएका छौं।</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Local Stories / User Blogs Section (New Premium Section) -->
+            <section id="local-blog-section" class="news-section fade-in">
+                <div class="section-header">
+                    <h2 class="section-title"><i class="fas fa-feather-alt"></i> स्थानीय हाइलाइट्स (Local Highlights)
+                    </h2>
+                    <span class="blog-badge">New</span>
+                </div>
+                <div id="local-news-grid" class="news-grid">
+                    <!-- This will be populated by the Admin Panel / LocalStorage -->
+                    <div class="no-news">स्थानीय रिपोर्टहरु यहाँ देखा पर्नेछन्।</div>
+                </div>
+            </section>
+
+            <!-- Automated Featured News -->
+            <section id="dynamic-featured-news" class="featured-news">
+                <div class="loading">ताजा समाचार लोड हुँदैछ...</div>
+            </section>
+
+            <!-- Automated News Sections -->
+            <div id="news-sections-container">
+                <!-- Politics Section -->
+                <section id="section-politics" class="news-section themed-section" data-category="8">
+                    <div class="section-header">
+                        <h2 class="section-title">राजनीति (Politics)</h2>
+                        <a href="#" class="view-all">सबै हेर्नुहोस्</a>
+                    </div>
+                    <div class="news-grid dynamic-category-grid" data-category="8">
+                        <div class="loading">लोड हुँदैछ...</div>
+                    </div>
+                </section>
+
+                <!-- National Section -->
+                <section id="section-national" class="news-section themed-section" data-category="1">
+                    <div class="section-header">
+                        <h2 class="section-title">राष्ट्रिय (National)</h2>
+                        <a href="#" class="view-all">सबै हेर्नुहोस्</a>
+                    </div>
+                    <div class="news-grid dynamic-category-grid" data-category="1">
+                        <div class="loading">लोड हुँदैछ...</div>
+                    </div>
+                </section>
+
+                <!-- Society Section -->
+                <section id="section-society" class="news-section themed-section" data-category="13">
+                    <div class="section-header">
+                        <h2 class="section-title">समाज (Society)</h2>
+                        <a href="#" class="view-all">सबै हेर्नुहोस्</a>
+                    </div>
+                    <div class="news-grid dynamic-category-grid" data-category="13">
+                        <div class="loading">लोड हुँदैछ...</div>
+                    </div>
+                </section>
+
+                <!-- International Section -->
+                <section id="section-international" class="news-section themed-section" data-category="6">
+                    <div class="section-header">
+                        <h2 class="section-title">विदेश (International)</h2>
+                        <a href="#" class="view-all">सबै हेर्नुहोस्</a>
+                    </div>
+                    <div class="news-grid dynamic-category-grid" data-category="6">
+                        <div class="loading">लोड हुँदैछ...</div>
+                    </div>
+                </section>
+
+                <!-- Sports Section -->
+                <section id="section-sports" class="news-section themed-section" data-category="20">
+                    <div class="section-header">
+                        <h2 class="section-title">खेलकुद (Sports)</h2>
+                        <a href="#" class="view-all">सबै हेर्नुहोस्</a>
+                    </div>
+                    <div class="news-grid dynamic-category-grid" data-category="20">
+                        <div class="loading">लोड हुँदैछ...</div>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </main>
+
+    <footer class="site-footer">
+        <div class="container">
+            <div class="footer-widgets">
+                <div class="footer-widget">
+                    <h3>ABOUT US</h3>
+                    <p>MK Media is the leading news portal in Bardibas, Nepal. We publish local, national and
+                        international news, analysis and various information.</p>
+                    <div class="footer-social">
+                        <a href="#"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-youtube"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                        <a href="https://github.com/" target="_blank"><i class="fab fa-github"></i></a>
+                    </div>
+                </div>
+
+                <div class="footer-widget">
+                    <h3>YOUR FEEDBACK</h3>
+                    <form class="feedback-form" id="mk-feedback-form">
+                        <input type="text" name="name" id="fb-name" placeholder="Your Name" required>
+                        <input type="email" name="email" id="fb-email" placeholder="Your Email" required>
+                        <textarea name="message" id="fb-message" placeholder="Your Feedback" required></textarea>
+                        <button type="submit">SUBMIT</button>
+                        <div id="form-message"
+                            style="display:none; color: var(--primary-color); margin-top: 10px; font-weight: bold;">
+                        </div>
+                    </form>
+                </div>
+
+                <div class="footer-widget">
+                    <h3>CONTACT US</h3>
+                    <address>
+                        <p><i class="fas fa-map-marker-alt"></i> Bardibas-14, Mahottari, Nepal</p>
+                        <p><i class="fas fa-phone"></i> +977-9841234567</p>
+                        <p><i class="fas fa-envelope"></i> mkmediagroupnepal@gmail.com</p>
+                    </address>
+                </div>
+            </div>
+
+            <div class="footer-bottom">
+                <div class="copyright">
+                    &copy; 2026 MK MEDIA. ALL RIGHTS RESERVED.
+                </div>
+                <div class="footer-links">
+                    <a href="privacy.html">PRIVACY POLICY</a>
+                    <a href="terms.html">TERMS</a>
+                    <a href="advertise.html">ADVERTISE</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Font Awesome for icons -->
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+
+    <!-- Main JavaScript -->
+    <!-- SweetAlert2 for Premium Popups -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="js/main.js"></script>
+</body>
+
+</html>
