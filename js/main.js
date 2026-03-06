@@ -91,13 +91,24 @@ function rebrand(text) {
         .replace(/Tpt/g, "MK Media");
 }
 
-// Global Image Proxy to bypass hotlink protection
+// Global Image Proxy to bypass hotlink protection and serve GitHub uploads
 function proxyImage(url) {
-    if (!url || url.includes('images/')) return url || 'images/news-placeholder.jpg';
+    const FALLBACK_IMAGE = 'https://raw.githubusercontent.com/krinsh777/mk-media-group-/main/images/logo.png';
+    if (!url) return FALLBACK_IMAGE;
+
+    // If it's a locally uploaded news image stored in GitHub
+    if (url.includes('images/news/')) {
+        const ghRepo = 'krinsh777/mk-media-group-';
+        return `https://raw.githubusercontent.com/${ghRepo}/main/${url}?v=${Date.now()}`;
+    }
+
+    if (url.includes('images/')) return url;
+
     // Remove protocol and use i0.wp.com as bridge
     const cleanUrl = url.replace(/^https?:\/\//, '');
     return `https://i0.wp.com/${cleanUrl}`;
 }
+
 
 function updateUIStrings() {
     const t = translations[currentLang];
@@ -686,3 +697,4 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }, 600000);
 });
+
