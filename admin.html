@@ -331,11 +331,13 @@
         const ghToken = "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";
         const ghRepo = "krinsh777/mk-media-group-";
 
-        // Global Image Proxy to handle cross-device synced images
+        // Global Image Proxy to handle hotlink protection and cross-device cloud images
         function proxyImage(url) {
-            if (!url) return 'images/news-placeholder.jpg';
+            if (!url) return 'https://via.placeholder.com/400x300?text=News+Article';
+
+            // Redirect local news images to GitHub Raw with cache busting for INSTANT visibility
             if (typeof url === 'string' && url.startsWith('images/news/')) {
-                return `https://raw.githubusercontent.com/${ghRepo}/main/${url}`;
+                return `https://raw.githubusercontent.com/${ghRepo}/main/${url}?v=${Date.now()}`;
             }
             return url;
         }
@@ -534,15 +536,23 @@
                 newsListGrid.innerHTML = '<p style="text-align:center; padding: 40px; color: grey;">अहिले कुनै समाचार छैन। (Empty feed)</p>';
                 return;
             }
-            newsListGrid.innerHTML = list.map(item => `
-                <div class="admin-list-item fade-in">
-                    <div style="flex: 1; cursor: pointer;" onclick="openNewsReader(${item.id})">
-                        <strong style="display:block; font-size: 1.1rem; color: var(--secondary-color);">${item.title}</strong>
-                        <small style="color: grey; font-weight: 600;"><i class="fas fa-calendar-alt"></i> ${item.date}</small>
+            const html = list.map(item => `
+                <div class="admin-list-item fade-in-up">
+                    <div style="flex: 1; cursor: pointer; display: flex; align-items: center; gap: 15px;" onclick="openNewsReader(${item.id})">
+                        <img src="${proxyImage(item.image)}" style="width: 50px; height: 50px; border-radius: 8px; object-fit: cover;">
+                        <div>
+                            <strong style="display:block; font-size: 1.1rem; color: var(--secondary-color);">${item.title}</strong>
+                            <small style="color: grey; font-weight: 600;"><i class="fas fa-calendar-alt"></i> ${item.date}</small>
+                        </div>
                     </div>
                     <button class="btn-delete" onclick="deleteStory(${item.id})" title="Delete"><i class="fas fa-trash"></i></button>
                 </div>
             `).join('');
+
+            // Only update if content changed to prevent flicker
+            if (newsListGrid.innerHTML.replace(/\s+/g, '') !== html.replace(/\s+/g, '')) {
+                newsListGrid.innerHTML = html;
+            }
         }
 
         async function deleteStory(id) {
