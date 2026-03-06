@@ -91,6 +91,14 @@ function rebrand(text) {
         .replace(/Tpt/g, "MK Media");
 }
 
+// Global Image Proxy to bypass hotlink protection
+function proxyImage(url) {
+    if (!url || url.includes('images/')) return url || 'images/news-placeholder.jpg';
+    // Remove protocol and use i0.wp.com as bridge
+    const cleanUrl = url.replace(/^https?:\/\//, '');
+    return `https://i0.wp.com/${cleanUrl}`;
+}
+
 function updateUIStrings() {
     const t = translations[currentLang];
 
@@ -194,7 +202,7 @@ async function fetchFeaturedNews() {
                     <article class="main-feature">
                         <div class="featured-image">
                             <span class="trending-badge"><i class="fas fa-fire"></i> ${trendingLabel}</span>
-                            <img referrerpolicy="no-referrer" src="${mainPost._embedded?.['wp:featuredmedia']?.[0]?.source_url || 'images/featured-1.jpg'}" alt="Featured News">
+                            <img src="${proxyImage(mainPost._embedded?.['wp:featuredmedia']?.[0]?.source_url)}" alt="Featured News">
                             <div class="category-label">${topStoryLabel}</div>
                         </div>
                         <div class="featured-content">
@@ -213,7 +221,7 @@ async function fetchFeaturedNews() {
                     ${secondaryPosts.map(post => `
                         <article class="secondary-feature">
                             <div class="featured-image">
-                                <img referrerpolicy="no-referrer" src="${post._embedded?.['wp:featuredmedia']?.[0]?.source_url || 'images/featured-2.jpg'}" alt="Secondary News">
+                                <img src="${proxyImage(post._embedded?.['wp:featuredmedia']?.[0]?.source_url)}" alt="Secondary News">
                             </div>
                             <div class="featured-content">
                                 <h3><a href="${post.link}" target="_blank">${rebrand(post.title.rendered)}</a></h3>
@@ -243,7 +251,7 @@ async function fetchCategoryNews(categoryId, gridElement) {
 
         if (posts && posts.length > 0) {
             gridElement.innerHTML = posts.map(post => {
-                const imageUrl = post._embedded?.['wp:featuredmedia']?.[0]?.source_url || 'images/news-placeholder.jpg';
+                const imageUrl = proxyImage(post._embedded?.['wp:featuredmedia']?.[0]?.source_url);
                 const title = rebrand(post.title.rendered);
                 const date = new Date(post.date).toLocaleDateString(currentLang === 'ne' ? 'ne-NP' : 'en-US');
 
@@ -298,7 +306,7 @@ async function fetchVideoContent() {
                 <div class="sidebar-title">${translations[currentLang].recent_videos}</div>
                 ${posts.map(post => `
                     <div class="sidebar-video-item" onclick="window.open('${post.link}', '_blank')">
-                        <img referrerpolicy="no-referrer" src="${post._embedded?.['wp:featuredmedia']?.[0]?.source_url || 'images/video-1.jpg'}" alt="Video">
+                        <img src="${proxyImage(post._embedded?.['wp:featuredmedia']?.[0]?.source_url)}" alt="Video">
                         <p>${rebrand(post.title.rendered)}</p>
                     </div>
                 `).join('')}
@@ -495,7 +503,7 @@ document.addEventListener('DOMContentLoaded', function () {
         grid.innerHTML = localData.map(item => `
         <article class="news-item">
             <div class="news-image">
-                <img referrerpolicy="no-referrer" src="${item.image}" alt="${item.title}" onerror="this.src='images/news-placeholder.jpg'">
+                <img src="${proxyImage(item.image)}" alt="${item.title}" onerror="this.src='images/news-placeholder.jpg'">
             </div>
             <div class="news-content">
                 <span class="category-label">${t.local_title}</span>
@@ -528,7 +536,7 @@ document.addEventListener('DOMContentLoaded', function () {
             html: `
                 <div class="reader-container">
                     <div class="reader-hero">
-                        <img referrerpolicy="no-referrer" src="${item.image}" alt="${item.title}" onerror="this.src='images/news-placeholder.jpg'">
+                        <img src="${proxyImage(item.image)}" alt="${item.title}" onerror="this.src='images/news-placeholder.jpg'">
                         <div class="reader-meta">
                             <span class="reader-category">${t.local_title}</span>
                             <h2 class="reader-title">${item.title}</h2>
