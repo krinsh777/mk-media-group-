@@ -96,14 +96,14 @@ const GH_REPO = 'krinsh777/mk-media-group-'; // Global Repo for cross-device syn
 // Global Image Proxy to bypass hotlink protection and handle cloud-stored images
 function proxyImage(url) {
     if (!url) return 'images/news-placeholder.jpg';
-    
+
     // Redirect local news images to GitHub Raw for cross-device visibility
     if (typeof url === 'string' && url.startsWith('images/news/')) {
         return `https://raw.githubusercontent.com/${GH_REPO}/main/${url}`;
     }
 
     if (url.includes('images/')) return url;
-    
+
     // Remove protocol and use i0.wp.com as bridge
     const cleanUrl = url.replace(/^https?:\/\//, '');
     return `https://i0.wp.com/${cleanUrl}`;
@@ -334,7 +334,20 @@ document.addEventListener('DOMContentLoaded', function () {
     fetchBreakingNews();
     fetchVideoContent();
     loadLocalNews();
-    
+
+    // --- DEEP LINKING SUPPORT ---
+    function checkUrlForPost() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const postId = urlParams.get('post');
+        if (postId) {
+            // Delay to ensure local storage is filled before opening
+            setTimeout(() => {
+                if (window.openNewsReader) window.openNewsReader(postId);
+            }, 1000);
+        }
+    }
+    checkUrlForPost();
+
     // Update local highlights periodically
     setInterval(loadLocalNews, 300000); // Every 5 minutes
 
@@ -510,7 +523,7 @@ document.addEventListener('DOMContentLoaded', function () {
             const res = await fetch(rawUrl);
             if (res.ok) {
                 const cloudData = await res.json();
-                
+
                 // Compare to avoid unnecessary re-renders if content hasn't changed
                 if (JSON.stringify(cloudData) !== JSON.stringify(localData)) {
                     localData = cloudData;
@@ -553,6 +566,10 @@ document.addEventListener('DOMContentLoaded', function () {
         if (!item) return;
 
         const t = translations[currentLang];
+        const shareUrl = `${window.location.origin}${window.location.pathname}?post=${id}`;
+
+        // Update URL without refreshing for deep linking
+        window.history.pushState({ postId: id }, item.title, shareUrl);
 
         Swal.fire({
             customClass: {
@@ -563,6 +580,10 @@ document.addEventListener('DOMContentLoaded', function () {
             confirmButtonText: t.submit === 'Submit' ? 'Close Reader' : 'बन्द गर्नुहोस्',
             confirmButtonColor: 'var(--black)',
             width: '900px',
+            willClose: () => {
+                // Return to home URL when closed
+                window.history.pushState({}, document.title, window.location.origin + window.location.pathname);
+            },
             html: `
                 <div class="reader-container">
                     <div class="reader-hero">
@@ -573,16 +594,18 @@ document.addEventListener('DOMContentLoaded', function () {
                         </div>
                     </div>
                     <div class="reader-body">
-                        <div class="reader-actions" style="margin-bottom: 20px; display: flex; gap: 10px;">
-                            <button onclick="shareOnFacebook('${item.title}', '${item.image}')" class="btn-share-fb" style="background:#1877f2; color:white; border:none; padding:8px 15px; border-radius:8px; cursor:pointer; display:flex; align-items:center; gap:8px;">
-                                <i class="fab fa-facebook"></i> Facebook मा सेयर गर्नुहोस्
+                        <div class="reader-sender-info" style="margin-bottom: 20px; font-size: 14px; color: #666;">
+                            <i class="far fa-user"></i> MK Media Reporter | <i class="far fa-clock"></i> ${item.date}
+                        </div>
+                        <div class="reader-actions" style="margin-bottom: 25px; display: flex; flex-wrap: wrap; gap: 10px;">
+                            <button onclick="shareOnFacebook('${item.title.replace(/'/g, "\\'")}', '${proxyImage(item.image)}', '${item.content.substring(0, 150).replace(/'/g, "\\'")}', '${shareUrl}')" class="btn-share-fb" style="background:#1877f2; color:white; border:none; padding:10px 18px; border-radius:12px; cursor:pointer; display:flex; align-items:center; gap:8px; font-weight:700; transition:0.3s; box-shadow: 0 4px 12px rgba(24,119,242,0.3);">
+                                <i class="fab fa-facebook"></i> Facebook मा सेयर
                             </button>
-                            <button onclick="shareButtonGroup('${item.title}', '${item.content.substring(0, 100)}...')" class="btn-share-generic" style="background:#333; color:white; border:none; padding:8px 15px; border-radius:8px; cursor:pointer; display:flex; align-items:center; gap:8px;">
+                            <button onclick="shareButtonGroup('${item.title.replace(/'/g, "\\'")}', '${item.content.substring(0, 150).replace(/'/g, "\\'")}...', '${shareUrl}')" class="btn-share-generic" style="background:#333; color:white; border:none; padding:10px 18px; border-radius:12px; cursor:pointer; display:flex; align-items:center; gap:8px; font-weight:700; transition:0.3s;">
                                 <i class="fas fa-share-alt"></i> अरु ठाउँमा सेयर
                             </button>
                         </div>
-                        <span class="reader-date"><i class="far fa-clock"></i> ${item.date}</span>
-                        <div class="reader-content">${item.content.replace(/\n/g, '<br>')}</div>
+                        <div class="reader-content" style="line-height: 1.8; font-size: 1.1rem;">${item.content.replace(/\n/g, '<br>')}</div>
                     </div>
                 </div>
             `
@@ -590,23 +613,30 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // --- SOCIAL SHARING HELPERS ---
-    window.shareOnFacebook = function (title, image) {
-        const url = window.location.href;
-        const fbUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}&quote=${encodeURIComponent(title)}`;
+    window.shareOnFacebook = function (title, image, desc, url) {
+        // Since it's a static site, FB crawler won't see dynamic JS meta tags,
+        // but we can try to improve the quote.
+        const fbUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}&quote=${encodeURIComponent(title + '\n\n' + desc)}`;
         window.open(fbUrl, '_blank', 'width=600,height=400');
     }
 
-    window.shareButtonGroup = function (title, text) {
+    window.shareButtonGroup = function (title, text, url) {
         if (navigator.share) {
             navigator.share({
                 title: title,
                 text: text,
-                url: window.location.href
+                url: url
             }).catch(console.error);
         } else {
             // Fallback: Copy link
-            navigator.clipboard.writeText(window.location.href);
-            Swal.fire('Link Copied!', 'The link has been copied to your clipboard.', 'success');
+            navigator.clipboard.writeText(url);
+            Swal.fire({
+                title: 'Link Copied!',
+                text: 'The article link has been copied to your clipboard.',
+                icon: 'success',
+                timer: 2000,
+                showConfirmButton: false
+            });
         }
     }
 
