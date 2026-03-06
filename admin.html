@@ -296,6 +296,10 @@
                             </button>
                             <span id="upload-status">No photo selected</span>
                         </div>
+                        <div id="image-preview-container" style="margin-top: 15px; display: none;">
+                            <img id="image-preview" src=""
+                                style="max-width: 100%; border-radius: 12px; border: 2px solid var(--border-color); box-shadow: var(--shadow-sm);">
+                        </div>
                         <input type="hidden" id="news-image" required>
                     </div>
                 </div>
@@ -410,7 +414,10 @@
                             content: selectedImageBase64
                         })
                     });
-                    if (!imgRes.ok) throw new Error("Image upload to GitHub failed.");
+                    if (!imgRes.ok) {
+                        const errData = await imgRes.json();
+                        throw new Error(`GitHub Upload Error: ${errData.message} (${imgRes.status})`);
+                    }
                 }
 
                 // 2. Load current news list
@@ -461,6 +468,7 @@
                     hiddenImageUrl.value = "";
                     selectedImageBase64 = null;
                     selectedImageName = null;
+                    document.getElementById('image-preview-container').style.display = "none";
                     loadNews();
                 } else {
                     const err = await putRes.json();
