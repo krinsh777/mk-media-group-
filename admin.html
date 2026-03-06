@@ -541,6 +541,14 @@
                             </div>
                         </div>
                         <div class="reader-body">
+                            <div class="reader-actions" style="margin-bottom: 20px; display: flex; gap: 10px;">
+                                <button onclick="shareOnFacebook('${item.title}', '${item.image}')" class="btn-share-fb" style="background:#1877f2; color:white; border:none; padding:8px 15px; border-radius:8px; cursor:pointer; display:flex; align-items:center; gap:8px;">
+                                    <i class="fab fa-facebook"></i> Facebook मा सेयर गर्नुहोस्
+                                </button>
+                                <button onclick="shareButtonGroup('${item.title}', '${item.content.substring(0, 100)}...')" class="btn-share-generic" style="background:#333; color:white; border:none; padding:8px 15px; border-radius:8px; cursor:pointer; display:flex; align-items:center; gap:8px;">
+                                    <i class="fas fa-share-alt"></i> अरु ठाउँमा सेयर
+                                </button>
+                            </div>
                             <span class="reader-date"><i class="far fa-clock"></i> ${item.date}</span>
                             <div class="reader-content">${item.content.replace(/\n/g, '<br>')}</div>
                         </div>
