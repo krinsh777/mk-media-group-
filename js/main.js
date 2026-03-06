@@ -695,6 +695,8 @@ document.addEventListener('DOMContentLoaded', function () {
         document.querySelectorAll('.dynamic-category-grid').forEach(grid => {
             fetchCategoryNews(grid.dataset.category, grid);
         });
+        loadLocalNews();
     }, 600000);
 });
+
 
