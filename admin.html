@@ -480,8 +480,25 @@
         });
 
         // --- STORY LOAD/DELETE LOGIC ---
-        function loadNews() {
-            const list = JSON.parse(localStorage.getItem('mk_local_news') || '[]');
+        async function loadNews() {
+            newsListGrid.innerHTML = '<p style="text-align:center; padding: 40px; color: grey;">Connecting to cloud sync... ⌛</p>';
+
+            let list = [];
+            try {
+                // ALWAYS fetch from GitHub in Admin to ensure cross-device consistency
+                const rawUrl = `https://raw.githubusercontent.com/${ghRepo}/main/data/news.json?v=${Date.now()}`;
+                const res = await fetch(rawUrl);
+                if (res.ok) {
+                    list = await res.json();
+                    localStorage.setItem('mk_local_news', JSON.stringify(list));
+                } else {
+                    list = JSON.parse(localStorage.getItem('mk_local_news') || '[]');
+                }
+            } catch (e) {
+                console.error("Cloud fetch failed", e);
+                list = JSON.parse(localStorage.getItem('mk_local_news') || '[]');
+            }
+
             if (list.length === 0) {
                 newsListGrid.innerHTML = '<p style="text-align:center; padding: 40px; color: grey;">अहिले कुनै समाचार छैन। (Empty feed)</p>';
                 return;
@@ -498,23 +515,54 @@
             `).join('');
         }
 
-        function deleteStory(id) {
-            Swal.fire({
+        async function deleteStory(id) {
+            const { isConfirmed } = await Swal.fire({
                 title: 'Delete Story?',
-                text: "This cannot be undone!",
+                text: "This story will be removed from all devices globally!",
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonColor: '#d33',
-                confirmButtonText: 'Delete Permanently'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    let list = JSON.parse(localStorage.getItem('mk_local_news') || '[]');
-                    list = list.filter(it => it.id !== id);
-                    localStorage.setItem('mk_local_news', JSON.stringify(list));
-                    loadNews();
-                    Swal.fire('Deleted!', 'Story has been removed.', 'success');
-                }
+                confirmButtonText: 'Yes, Delete Globally'
             });
+
+            if (isConfirmed) {
+                Swal.fire({ title: 'Syncing Deletion...', didOpen: () => Swal.showLoading() });
+
+                let list = JSON.parse(localStorage.getItem('mk_local_news') || '[]');
+                list = list.filter(it => it.id !== id);
+
+                try {
+                    // Update GitHub JSON
+                    const fileName = 'data/news.json';
+                    const getRes = await fetch(`https://api.github.com/repos/${ghRepo}/contents/${fileName}`, {
+                        headers: { 'Authorization': `token ${ghToken}` }
+                    });
+                    const fileData = await getRes.json();
+
+                    const putRes = await fetch(`https://api.github.com/repos/${ghRepo}/contents/${fileName}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Authorization': `token ${ghToken}`,
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            message: `Delete Story ID: ${id}`,
+                            content: btoa(unescape(encodeURIComponent(JSON.stringify(list)))),
+                            sha: fileData.sha
+                        })
+                    });
+
+                    if (putRes.ok) {
+                        localStorage.setItem('mk_local_news', JSON.stringify(list));
+                        await loadNews();
+                        Swal.fire('Deleted!', 'Story removed from cloud.', 'success');
+                    } else {
+                        throw new Error("Failed to update cloud list.");
+                    }
+                } catch (e) {
+                    Swal.fire('Sync Error', 'Deleted locally, but cloud sync failed.', 'error');
+                }
+            }
         }
 
         // --- IMMERSIVE PREVIEW READER ---
