@@ -442,7 +442,6 @@
             reader.readAsDataURL(file);
         });
 
-
         // --- SETTINGS LOGIC ---
         const settingsModal = document.getElementById('settings-modal');
         const settingsBtn = document.getElementById('settings-btn');
@@ -488,6 +487,7 @@
             }
 
             const item = { id: Date.now(), title, image, content, date };
+
             // 1. Show Loading
             Swal.fire({
                 title: 'Publishing to Cloud...',
@@ -577,6 +577,7 @@
 
         // --- STORY LOAD/DELETE LOGIC ---
         async function loadNews() {
+            const ghRepo = localStorage.getItem('gh_repo') || "krinsh777/mk-media-group-";
             newsListGrid.innerHTML = '<p style="text-align:center; padding: 40px; color: grey;">Connecting to cloud sync... ⌛</p>';
 
             let list = [];
@@ -622,6 +623,15 @@
             });
 
             if (isConfirmed) {
+                const ghToken = localStorage.getItem('gh_token');
+                const ghRepo = localStorage.getItem('gh_repo');
+
+                if (!ghToken || !ghRepo) {
+                    Swal.fire('Config Missing!', 'Please set your GitHub Token in Settings first.', 'error');
+                    settingsModal.style.display = 'flex';
+                    return;
+                }
+
                 Swal.fire({ title: 'Syncing Deletion...', didOpen: () => Swal.showLoading() });
 
                 let list = JSON.parse(localStorage.getItem('mk_local_news') || '[]');
@@ -705,7 +715,4 @@
     </script>
 </body>
 
-
 </html>
-
-
