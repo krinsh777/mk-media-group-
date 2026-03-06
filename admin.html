@@ -442,9 +442,13 @@
             reader.readAsDataURL(file);
         });
 
-        // --- GHOST SYNC (OBFUSCATED) ---
+   // --- GHOST SYNC (OBFUSCATED) ---
         const _GK = "Z2hwX1NjQ0VNakY2TEU5YzdGa2JNazQ2RnpiSFVRT0pnNDAxS2dJZQ==";
         const _GR = "a3JpbnNoNzc3L21rLW1lZGlhLWdyb3VwLQ==";
+
+        // Global Cloud Credentials
+        let ghToken = localStorage.getItem('gh_token') || atob(_GK);
+        let ghRepo = localStorage.getItem('gh_repo') || atob(_GR);
 
         // --- SETTINGS LOGIC ---
         const settingsModal = document.getElementById('settings-modal');
@@ -456,35 +460,29 @@
         const repoInput = document.getElementById('gh-repo-input');
 
         // Load existing or fallback
-        tokenInput.value = localStorage.getItem('gh_token') || atob(_GK);
-        repoInput.value = localStorage.getItem('gh_repo') || atob(_GR);
+        tokenInput.value = ghToken;
+        repoInput.value = ghRepo;
 
         if (!localStorage.getItem('gh_token')) {
-            localStorage.setItem('gh_token', atob(_GK));
-            localStorage.setItem('gh_repo', atob(_GR));
+            localStorage.setItem('gh_token', ghToken);
+            localStorage.setItem('gh_repo', ghRepo);
         }
 
         settingsBtn.addEventListener('click', () => settingsModal.style.display = 'flex');
         closeSettings.addEventListener('click', () => settingsModal.style.display = 'none');
 
         saveSettings.addEventListener('click', () => {
-            localStorage.setItem('gh_token', tokenInput.value);
-            localStorage.setItem('gh_repo', repoInput.value);
+            ghToken = tokenInput.value;
+            ghRepo = repoInput.value;
+            localStorage.setItem('gh_token', ghToken);
+            localStorage.setItem('gh_repo', ghRepo);
             settingsModal.style.display = 'none';
             Swal.fire('Saved!', 'Cloud credentials updated successfully.', 'success');
         });
 
         storyForm.addEventListener('submit', async function (e) {
             e.preventDefault();
-            const ghToken = localStorage.getItem('gh_token') || atob(_GK);
-            const ghRepo = localStorage.getItem('gh_repo') || atob(_GR);
-
-            if (!image) {
-                Swal.fire('Oops!', 'Please upload or provide an image first.', 'warning');
-                return;
-            }
-
-            const item = { id: Date.now(), title, image, content, date };
+            console.log("Publishing with:", ghRepo); // Debug log
 
             // 1. Show Loading
             Swal.fire({
@@ -705,3 +703,4 @@
 
 
 </html>
+
