@@ -348,37 +348,23 @@
         const uploadStatus = document.getElementById('upload-status');
         const hiddenImageUrl = document.getElementById('news-image');
 
-        imageFileInput.addEventListener('change', async function () {
+        let selectedImageBase64 = null;
+        let selectedImageName = null;
+
+        imageFileInput.addEventListener('change', function () {
             const file = this.files[0];
             if (!file) return;
 
-            uploadStatus.textContent = "Uploading... ⌛";
-            uploadStatus.style.color = "var(--primary-color)";
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                selectedImageBase64 = e.target.result.split(',')[1]; // Get base64 only
+                selectedImageName = `img_${Date.now()}.${file.name.split('.').pop()}`;
 
-            const formData = new FormData();
-            formData.append('image', file);
-
-            try {
-                // Using a public ImgBB key for demo (User should use their own later)
-                const res = await fetch('https://api.imgbb.com/1/upload?key=6711904a086202521d960098f99e31d0', {
-                    method: 'POST',
-                    body: formData
-                });
-                const data = await res.json();
-
-                if (data.success) {
-                    hiddenImageUrl.value = data.data.url;
-                    uploadStatus.textContent = "Photo Uploaded! ✅";
-                    uploadStatus.style.color = "green";
-                } else {
-                    const errorMsg = data.error ? data.error.message : "Upload failed";
-                    throw new Error(errorMsg);
-                }
-            } catch (e) {
-                uploadStatus.textContent = "Upload Failed! ❌ " + (e.message || "");
-                uploadStatus.style.color = "red";
-                console.error(e);
-            }
+                uploadStatus.textContent = "Photo Ready! (Will upload on Publish) 📸";
+                uploadStatus.style.color = "var(--primary-color)";
+                hiddenImageUrl.value = `images/news/${selectedImageName}`;
+            };
+            reader.readAsDataURL(file);
         });
 
         // --- CLOUD PUBLISHING ENGINE ---
@@ -411,11 +397,27 @@
             });
 
             try {
-                // 2. Load current list
+                // 1. Upload Image to GitHub first
+                if (selectedImageBase64) {
+                    const imgRes = await fetch(`https://api.github.com/repos/${ghRepo}/contents/images/news/${selectedImageName}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Authorization': `token ${ghToken}`,
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            message: `Upload Image: ${selectedImageName}`,
+                            content: selectedImageBase64
+                        })
+                    });
+                    if (!imgRes.ok) throw new Error("Image upload to GitHub failed.");
+                }
+
+                // 2. Load current news list
                 let localList = JSON.parse(localStorage.getItem('mk_local_news') || '[]');
                 localList.unshift(item);
 
-                // 3. GitHub API Update
+                // 3. GitHub API News.json Update
                 const fileName = 'data/news.json';
 
                 // Get current SHA
@@ -429,7 +431,7 @@
                     sha = fileData.sha;
                 }
 
-                // Push Update
+                // Push JSON Update
                 const putRes = await fetch(`https://api.github.com/repos/${ghRepo}/contents/${fileName}`, {
                     method: 'PUT',
                     headers: {
@@ -457,6 +459,8 @@
                     this.reset();
                     uploadStatus.textContent = "No photo selected";
                     hiddenImageUrl.value = "";
+                    selectedImageBase64 = null;
+                    selectedImageName = null;
                     loadNews();
                 } else {
                     const err = await putRes.json();
