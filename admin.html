@@ -370,10 +370,11 @@
                     uploadStatus.textContent = "Photo Uploaded! ✅";
                     uploadStatus.style.color = "green";
                 } else {
-                    throw new Error("Upload failed");
+                    const errorMsg = data.error ? data.error.message : "Upload failed";
+                    throw new Error(errorMsg);
                 }
             } catch (e) {
-                uploadStatus.textContent = "Upload Failed! ❌";
+                uploadStatus.textContent = "Upload Failed! ❌ " + (e.message || "");
                 uploadStatus.style.color = "red";
                 console.error(e);
             }
@@ -428,7 +429,7 @@
                 }
 
                 // Push Update
-                const putRes = await fetch(`https://api.github.com/repos/${repoSelect.value || ghRepo}/contents/${fileName}`, {
+                const putRes = await fetch(`https://api.github.com/repos/${ghRepo}/contents/${fileName}`, {
                     method: 'PUT',
                     headers: {
                         'Authorization': `token ${ghToken}`,
