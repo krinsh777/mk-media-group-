@@ -91,9 +91,19 @@ function rebrand(text) {
         .replace(/Tpt/g, "MK Media");
 }
 
-// Global Image Proxy to bypass hotlink protection
+const GH_REPO = 'krinsh777/mk-media-group-'; // Global Repo for cross-device sync
+
+// Global Image Proxy to bypass hotlink protection and handle cloud-stored images
 function proxyImage(url) {
-    if (!url || url.includes('images/')) return url || 'images/news-placeholder.jpg';
+    if (!url) return 'images/news-placeholder.jpg';
+    
+    // Redirect local news images to GitHub Raw for cross-device visibility
+    if (typeof url === 'string' && url.startsWith('images/news/')) {
+        return `https://raw.githubusercontent.com/${GH_REPO}/main/${url}`;
+    }
+
+    if (url.includes('images/')) return url;
+    
     // Remove protocol and use i0.wp.com as bridge
     const cleanUrl = url.replace(/^https?:\/\//, '');
     return `https://i0.wp.com/${cleanUrl}`;
@@ -324,6 +334,9 @@ document.addEventListener('DOMContentLoaded', function () {
     fetchBreakingNews();
     fetchVideoContent();
     loadLocalNews();
+    
+    // Update local highlights periodically
+    setInterval(loadLocalNews, 300000); // Every 5 minutes
 
     // Preloader Hiding Logic (Advanced)
     const hidePreloader = () => {
@@ -475,51 +488,62 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // Load Local News from LocalStorage or GitHub
+    // Load Local News from LocalStorage then refresh from GitHub
     async function loadLocalNews() {
         const grid = document.getElementById('local-news-grid');
         if (!grid) return;
         const t = translations[currentLang];
 
-        // Hardcoded Repo for MK Media to ensure cross-device consistency
-        const ghRepo = 'krinsh777/mk-media-group-';
-        let localData = [];
-
-        try {
-            // ALWAYS try to fetch the latest news from GitHub first for cross-device sync
-            const rawUrl = `https://raw.githubusercontent.com/${ghRepo}/main/data/news.json?v=${Date.now()}`;
-            const res = await fetch(rawUrl);
-            if (res.ok) {
-                localData = await res.json();
-                localStorage.setItem('mk_local_news', JSON.stringify(localData));
-            } else {
-                // Fallback to local storage if offline
-                localData = JSON.parse(localStorage.getItem('mk_local_news') || '[]');
-            }
-        } catch (e) {
-            console.warn("Cloud fetch failed, using local backup", e);
-            localData = JSON.parse(localStorage.getItem('mk_local_news') || '[]');
+        // 1. Immediate Load from Cache to prevent flickering
+        let localData = JSON.parse(localStorage.getItem('mk_local_news') || '[]');
+        if (localData.length > 0) {
+            renderLocalGrid(localData, grid, t);
+        } else {
+            grid.innerHTML = `<div class="loading-news" style="padding:40px; text-align:center; color:grey;">
+                <i class="fas fa-sync fa-spin"></i> ${t.loading}
+            </div>`;
         }
 
-        if (localData.length === 0) {
-            grid.innerHTML = `<div class="no-news">${t.no_local}</div>`;
+        // 2. Refresh from GitHub Cloud
+        try {
+            const rawUrl = `https://raw.githubusercontent.com/${GH_REPO}/main/data/news.json?v=${Date.now()}`;
+            const res = await fetch(rawUrl);
+            if (res.ok) {
+                const cloudData = await res.json();
+                
+                // Compare to avoid unnecessary re-renders if content hasn't changed
+                if (JSON.stringify(cloudData) !== JSON.stringify(localData)) {
+                    localData = cloudData;
+                    localStorage.setItem('mk_local_news', JSON.stringify(localData));
+                    renderLocalGrid(localData, grid, t);
+                }
+            }
+        } catch (e) {
+            console.warn("Cloud sync failed, using offline backup", e);
+        }
+    }
+
+    // Helper to render the local grid
+    function renderLocalGrid(data, container, t) {
+        if (!data || data.length === 0) {
+            container.innerHTML = `<div class="no-news">${t.no_local}</div>`;
             return;
         }
 
-        grid.innerHTML = localData.map(item => `
-        <article class="news-item">
-            <div class="news-image">
-                <img src="${proxyImage(item.image)}" alt="${item.title}" onerror="this.src='images/news-placeholder.jpg'">
-            </div>
-            <div class="news-content">
-                <span class="category-label">${t.local_title}</span>
-                <h3><a href="javascript:void(0)" onclick="openNewsReader(${item.id})">${item.title}</a></h3>
-                <div class="post-meta">
-                    <span class="post-date"><i class="far fa-clock"></i> ${item.date}</span>
+        container.innerHTML = data.map(item => `
+            <article class="news-item fade-in-up" style="animation: fadeInUp 0.5s ease forwards">
+                <div class="news-image">
+                    <img referrerpolicy="no-referrer" src="${proxyImage(item.image)}" alt="${item.title}" onerror="this.src='images/news-placeholder.jpg'">
                 </div>
-            </div>
-        </article>
-    `).join('');
+                <div class="news-content">
+                    <span class="category-label">${t.local_title}</span>
+                    <h3><a href="javascript:void(0)" onclick="openNewsReader(${item.id})">${item.title}</a></h3>
+                    <div class="post-meta">
+                        <span class="post-date"><i class="far fa-clock"></i> ${item.date}</span>
+                    </div>
+                </div>
+            </article>
+        `).join('');
     }
 
     // --- IMMERSIVE NEWS READER ---
