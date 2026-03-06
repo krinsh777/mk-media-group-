@@ -481,7 +481,8 @@ document.addEventListener('DOMContentLoaded', function () {
         if (!grid) return;
         const t = translations[currentLang];
 
-        const ghRepo = localStorage.getItem('mk_gh_repo') || 'krinsh777/mk-media-group-';
+        // Hardcoded Repo for MK Media to ensure cross-device consistency
+        const ghRepo = 'krinsh777/mk-media-group-';
         let localData = [];
 
         try {
