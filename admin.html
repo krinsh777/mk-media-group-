@@ -377,9 +377,18 @@
                 selectedImageBase64 = e.target.result.split(',')[1]; // Get base64 only
                 selectedImageName = `img_${Date.now()}.${file.name.split('.').pop()}`;
 
-                uploadStatus.textContent = "Photo Ready! (Will upload on Publish) 📸";
-                uploadStatus.style.color = "var(--primary-color)";
+                // Show visual feedback and preview
+                uploadStatus.textContent = "Photo Ready! 📸";
+                uploadStatus.style.color = "#166534";
                 hiddenImageUrl.value = `images/news/${selectedImageName}`;
+
+                // Show the image preview immediately
+                const previewImg = document.getElementById('image-preview');
+                const previewContainer = document.getElementById('image-preview-container');
+                if (previewImg && previewContainer) {
+                    previewImg.src = e.target.result;
+                    previewContainer.style.display = "block";
+                }
             };
             reader.readAsDataURL(file);
         });
