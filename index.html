@@ -136,10 +136,16 @@
 
             <!-- Local Stories / User Blogs Section (New Premium Section) -->
             <section id="local-blog-section" class="news-section fade-in">
-                <div class="section-header">
+                <div class="section-header" style="display: flex; justify-content: space-between; align-items: center;">
                     <h2 class="section-title"><i class="fas fa-newspaper"></i> Latest News
                     </h2>
-                    <span class="blog-badge">New</span>
+                    <div style="display: flex; gap: 10px; align-items: center;">
+                        <button onclick="loadLocalNews()" class="btn-secondary"
+                            style="background: var(--primary-color); color: white; border: none; padding: 5px 12px; border-radius: 20px; font-size: 12px; cursor: pointer;">
+                            <i class="fas fa-sync-alt"></i> Refresh
+                        </button>
+                        <span class="blog-badge">New</span>
+                    </div>
                 </div>
                 <div id="local-news-grid" class="news-grid">
                     <!-- This will be populated by the Admin Panel / LocalStorage -->
