@@ -93,18 +93,18 @@ function rebrand(text) {
 
 const GH_REPO = 'krinsh777/mk-media-group-'; // Global Repo for cross-device sync
 
-// Global Image Proxy to bypass hotlink protection and handle cloud-stored images
+// Global Image Proxy to handle hotlink protection and cross-device cloud images
 function proxyImage(url) {
     if (!url) return 'images/news-placeholder.jpg';
 
-    // Redirect local news images to GitHub Raw for cross-device visibility
+    // Redirect local news images to jsDelivr for faster cross-device visibility
     if (typeof url === 'string' && url.startsWith('images/news/')) {
-        return `https://raw.githubusercontent.com/${GH_REPO}/main/${url}`;
+        return `https://cdn.jsdelivr.net/gh/${GH_REPO}@main/${url}`;
     }
 
     if (url.includes('images/')) return url;
 
-    // Remove protocol and use i0.wp.com as bridge
+    // Fallback for external images using bridge
     const cleanUrl = url.replace(/^https?:\/\//, '');
     return `https://i0.wp.com/${cleanUrl}`;
 }
@@ -545,18 +545,30 @@ document.addEventListener('DOMContentLoaded', function () {
 
         container.innerHTML = data.map(item => `
             <article class="news-item fade-in-up" style="animation: fadeInUp 0.5s ease forwards">
-                <div class="news-image">
+                <div class="news-image" onclick="openNewsReader(${item.id})">
                     <img referrerpolicy="no-referrer" src="${proxyImage(item.image)}" alt="${item.title}" onerror="this.src='images/news-placeholder.jpg'">
+                    <span class="category-label">${t.local_title}</span>
                 </div>
                 <div class="news-content">
-                    <span class="category-label">${t.local_title}</span>
                     <h3><a href="javascript:void(0)" onclick="openNewsReader(${item.id})">${item.title}</a></h3>
                     <div class="post-meta">
                         <span class="post-date"><i class="far fa-clock"></i> ${item.date}</span>
+                        <a href="javascript:void(0)" onclick="shareQuick(${item.id})" class="btn-share-mini" title="Share">
+                            <i class="fas fa-share-alt"></i>
+                        </a>
                     </div>
                 </div>
             </article>
         `).join('');
+    }
+
+    // Quick Share from Grid
+    window.shareQuick = function (id) {
+        const localData = JSON.parse(localStorage.getItem('mk_local_news') || '[]');
+        const item = localData.find(it => it.id == id);
+        if (!item) return;
+        const shareUrl = `${window.location.origin}${window.location.pathname}?post=${id}`;
+        window.shareButtonGroup(item.title, item.content.substring(0, 100) + '...', shareUrl);
     }
 
     // --- IMMERSIVE NEWS READER ---
