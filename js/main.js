@@ -481,18 +481,23 @@ document.addEventListener('DOMContentLoaded', function () {
         if (!grid) return;
         const t = translations[currentLang];
 
-        let localData = JSON.parse(localStorage.getItem('mk_local_news') || '[]');
         const ghRepo = localStorage.getItem('mk_gh_repo') || 'krinsh777/mk-media-group-';
+        let localData = [];
 
-        if (localData.length === 0 && ghRepo) {
-            try {
-                const rawUrl = `https://raw.githubusercontent.com/${ghRepo}/main/data/news.json`;
-                const res = await fetch(rawUrl);
-                if (res.ok) {
-                    localData = await res.json();
-                    localStorage.setItem('mk_local_news', JSON.stringify(localData));
-                }
-            } catch (e) { console.warn("Cloud fetch failed", e); }
+        try {
+            // ALWAYS try to fetch the latest news from GitHub first for cross-device sync
+            const rawUrl = `https://raw.githubusercontent.com/${ghRepo}/main/data/news.json?v=${Date.now()}`;
+            const res = await fetch(rawUrl);
+            if (res.ok) {
+                localData = await res.json();
+                localStorage.setItem('mk_local_news', JSON.stringify(localData));
+            } else {
+                // Fallback to local storage if offline
+                localData = JSON.parse(localStorage.getItem('mk_local_news') || '[]');
+            }
+        } catch (e) {
+            console.warn("Cloud fetch failed, using local backup", e);
+            localData = JSON.parse(localStorage.getItem('mk_local_news') || '[]');
         }
 
         if (localData.length === 0) {
@@ -543,12 +548,41 @@ document.addEventListener('DOMContentLoaded', function () {
                         </div>
                     </div>
                     <div class="reader-body">
+                        <div class="reader-actions" style="margin-bottom: 20px; display: flex; gap: 10px;">
+                            <button onclick="shareOnFacebook('${item.title}', '${item.image}')" class="btn-share-fb" style="background:#1877f2; color:white; border:none; padding:8px 15px; border-radius:8px; cursor:pointer; display:flex; align-items:center; gap:8px;">
+                                <i class="fab fa-facebook"></i> Facebook मा सेयर गर्नुहोस्
+                            </button>
+                            <button onclick="shareButtonGroup('${item.title}', '${item.content.substring(0, 100)}...')" class="btn-share-generic" style="background:#333; color:white; border:none; padding:8px 15px; border-radius:8px; cursor:pointer; display:flex; align-items:center; gap:8px;">
+                                <i class="fas fa-share-alt"></i> अरु ठाउँमा सेयर
+                            </button>
+                        </div>
                         <span class="reader-date"><i class="far fa-clock"></i> ${item.date}</span>
                         <div class="reader-content">${item.content.replace(/\n/g, '<br>')}</div>
                     </div>
                 </div>
             `
         });
+    }
+
+    // --- SOCIAL SHARING HELPERS ---
+    window.shareOnFacebook = function (title, image) {
+        const url = window.location.href;
+        const fbUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}&quote=${encodeURIComponent(title)}`;
+        window.open(fbUrl, '_blank', 'width=600,height=400');
+    }
+
+    window.shareButtonGroup = function (title, text) {
+        if (navigator.share) {
+            navigator.share({
+                title: title,
+                text: text,
+                url: window.location.href
+            }).catch(console.error);
+        } else {
+            // Fallback: Copy link
+            navigator.clipboard.writeText(window.location.href);
+            Swal.fire('Link Copied!', 'The link has been copied to your clipboard.', 'success');
+        }
     }
 
     // Fade-in effect logic on scroll
