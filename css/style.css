@@ -799,7 +799,6 @@ address i {
 
 .video-sidebar {
     flex: 1;
-    background: #000000;
     padding: 15px;
     border-radius: 8px;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
@@ -1265,3 +1264,4 @@ address i {
     }
 
 }
+
