@@ -1,0 +1,338 @@
+/* premium.css - Modern Overrides for a Premium Look */
+
+:root {
+    /* RED AND WHITE AGGRESSIVE THEME */
+    --primary-color: #ff0000;
+    --primary-hover: #cc0000;
+    --secondary-color: #c00000;
+    --accent-blue: #ff3333;
+    --accent-gold: #ffffff;
+    --font-heading: 'Outfit', sans-serif;
+    --font-body: 'Inter', 'Mukta', sans-serif;
+
+    /* Pure white background for high contrast */
+    --bg-light: #ffffff;
+    --bg-white: #ffffff;
+    --text-main: #000000;
+    --text-muted: #4e4e4e;
+    --border-color: rgba(255, 0, 0, 0.2);
+
+    /* Striking red shadows */
+    --shadow-soft: 0 8px 30px rgba(255, 0, 0, 0.1);
+    --shadow-hover: 0 15px 40px rgba(255, 0, 0, 0.25);
+}
+
+[data-theme="dark"] {
+    /* Dark mode inverted with harsh black/red/white */
+    --bg-light: #050000;
+    --bg-white: #0a0000;
+    --text-main: #ffffff;
+    --text-muted: #cccccc;
+    --secondary-color: #ffcccc;
+    --border-color: rgba(255, 0, 0, 0.3);
+    --shadow-soft: 0 8px 30px rgba(255, 0, 0, 0.3);
+    --shadow-hover: 0 15px 40px rgba(255, 0, 0, 0.5);
+}
+
+body {
+    font-family: var(--font-body);
+    background-color: var(--bg-light);
+    letter-spacing: -0.01em;
+}
+
+/* Glassmorphism Header */
+.main-navigation {
+    background: var(--primary-color) !important;
+    border-bottom: 2px solid var(--secondary-color);
+    box-shadow: var(--shadow-sm);
+}
+
+[data-theme="dark"] .main-navigation {
+    background: var(--primary-hover) !important;
+    border-bottom: 2px solid var(--secondary-color);
+}
+
+.menu li a {
+    color: #ffffff !important;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    border-radius: 8px;
+    position: relative;
+}
+
+[data-theme="dark"] .menu li a {
+    color: #ffffff !important;
+}
+
+.menu li a:hover {
+    background: #ffffff !important;
+    color: var(--primary-color) !important;
+}
+
+.nav-search-trigger {
+    color: #ffffff !important;
+}
+
+[data-theme="dark"] .nav-search-trigger {
+    color: #ffffff !important;
+}
+
+/* Premium News Grid Cards */
+.news-item {
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow-soft);
+    border-radius: 16px;
+    background: var(--bg-white);
+    transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.4s ease, border-color 0.4s ease;
+}
+
+[data-theme="dark"] .news-item {
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.news-item:hover {
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: var(--shadow-hover);
+    border-color: rgba(255, 0, 0, 0.3);
+}
+
+.news-image {
+    border-radius: 16px 16px 0 0;
+}
+
+.news-content {
+    padding: 24px;
+}
+
+.news-content h3 {
+    font-size: 1.35rem;
+    font-weight: 700;
+    line-height: 1.4;
+    margin-bottom: 16px;
+}
+
+.news-content h3 a {
+    color: var(--secondary-color);
+    text-decoration: none;
+    background-image: linear-gradient(var(--primary-color), var(--primary-color));
+    background-size: 0% 3px;
+    background-repeat: no-repeat;
+    background-position: left bottom;
+    transition: background-size 0.3s ease, color 0.3s ease;
+}
+
+[data-theme="dark"] .news-content h3 a {
+    color: var(--text-main);
+}
+
+.news-item:hover .news-content h3 a {
+    background-size: 100% 3px;
+    color: var(--primary-color);
+}
+
+/* Category Badges */
+.category-label {
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-hover) 100%);
+    box-shadow: 0 4px 15px rgba(255, 0, 0, 0.4);
+    font-weight: 700;
+    letter-spacing: 1px;
+    border-radius: 8px;
+    padding: 6px 16px;
+}
+
+.trending-badge {
+    background: rgba(255, 0, 0, 0.8);
+    border-radius: 8px;
+    color: #ffffff;
+}
+
+/* Main Featured Layout enhancements */
+.main-feature .featured-image img {
+    border-radius: 20px;
+    box-shadow: var(--shadow-soft);
+}
+
+.main-feature .featured-content h2 {
+    font-size: 2.2rem;
+    font-weight: 800;
+    line-height: 1.3;
+    margin-top: 20px;
+}
+
+.main-feature .featured-content h2 a {
+    background-image: linear-gradient(var(--primary-color), var(--primary-color));
+    background-size: 0% 3px;
+    background-repeat: no-repeat;
+    background-position: left bottom;
+    transition: background-size 0.3s ease;
+}
+
+.main-feature:hover .featured-content h2 a {
+    background-size: 100% 3px;
+    color: var(--primary-color);
+}
+
+.secondary-feature .featured-image img {
+    border-radius: 12px;
+}
+
+/* Breaking News Ticker Enhancement */
+.breaking-news {
+    background: linear-gradient(180deg, var(--bg-white), var(--bg-light));
+    border-radius: 12px;
+    box-shadow: var(--shadow-soft);
+    border: 1px solid rgba(255, 0, 0, 0.1);
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+    position: relative;
+    height: 45px;
+}
+
+.breaking-label {
+    background: linear-gradient(135deg, var(--primary-color), var(--primary-hover));
+    box-shadow: 2px 0 15px rgba(255, 0, 0, 0.4);
+    font-size: 16px;
+    font-weight: 800;
+    color: #fff;
+    padding: 0 20px;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    position: relative;
+    z-index: 10;
+    white-space: nowrap;
+}
+
+.breaking-wrapper {
+    flex: 1;
+    overflow: hidden;
+    position: relative;
+    height: 100%;
+}
+
+.breaking-scroll-container {
+    display: flex;
+    align-items: center;
+    white-space: nowrap;
+    position: absolute;
+    height: 100%;
+    left: 0;
+    animation: marquee 45s linear infinite;
+}
+
+.breaking-scroll-container:hover {
+    animation-play-state: paused;
+}
+
+.breaking-scroll-container a {
+    color: var(--text-main);
+    font-weight: 700;
+    font-size: 16px;
+    margin-right: 40px;
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.breaking-scroll-container a:hover {
+    color: var(--primary-color);
+}
+
+@keyframes marquee {
+    0% {
+        transform: translateX(0);
+    }
+
+    100% {
+        transform: translateX(-50%);
+    }
+}
+
+/* Responsiveness for breaking news */
+@media (max-width: 768px) {
+    .breaking-news {
+        height: 60px;
+    }
+
+    .breaking-label {
+        font-size: 14px;
+        padding: 0 10px;
+    }
+
+    .breaking-scroll-container {
+        animation: marquee 30s linear infinite;
+    }
+}
+
+@media (max-width: 480px) {
+    .breaking-scroll-container {
+        animation: marquee 25s linear infinite;
+    }
+}
+
+/* Smooth Video Section */
+.video-sidebar {
+    background: var(--bg-white);
+    border-radius: 16px;
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow-soft);
+    padding: 24px;
+}
+
+/* Buttons */
+.view-all {
+    background: rgba(255, 0, 0, 0.1);
+    color: var(--primary-color);
+    padding: 8px 20px;
+    border-radius: 50px;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    font-size: 14px;
+    letter-spacing: 1px;
+}
+
+.view-all:hover {
+    background: var(--primary-color);
+    color: #fff;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(255, 0, 0, 0.3);
+}
+
+/* Section Titles */
+.section-title {
+    font-weight: 800;
+}
+
+.section-title::after {
+    background-color: var(--primary-color);
+    height: 4px;
+    border-radius: 2px;
+}
+
+/* Theme Toggle Button Enhancement */
+.theme-toggle {
+    background: rgba(15, 23, 42, 0.05);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    color: white;
+}
+
+[data-theme="dark"] .theme-toggle {
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+}
+
+/* Owner/About Section Premium Upgrade */
+.about-mkmedia {
+    background: linear-gradient(145deg, var(--bg-white) 0%, var(--bg-light) 100%);
+    border: none;
+    box-shadow: var(--shadow-soft);
+}
+
+[data-theme="dark"] .about-mkmedia {
+    background: linear-gradient(145deg, var(--bg-white) 0%, rgba(17, 24, 39, 0.5) 100%);
+}
+
+.owner-image {
+    border: 6px solid var(--bg-white);
+    box-shadow: var(--shadow-hover);
+}
