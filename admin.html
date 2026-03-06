@@ -442,13 +442,6 @@
             reader.readAsDataURL(file);
         });
 
-   // --- GHOST SYNC (OBFUSCATED) ---
-        const _GK = "Z2hwX1NjQ0VNakY2TEU5YzdGa2JNazQ2RnpiSFVRT0pnNDAxS2dJZQ==";
-        const _GR = "a3JpbnNoNzc3L21rLW1lZGlhLWdyb3VwLQ==";
-
-        // Global Cloud Credentials
-        let ghToken = localStorage.getItem('gh_token') || atob(_GK);
-        let ghRepo = localStorage.getItem('gh_repo') || atob(_GR);
 
         // --- SETTINGS LOGIC ---
         const settingsModal = document.getElementById('settings-modal');
@@ -459,31 +452,42 @@
         const tokenInput = document.getElementById('gh-token-input');
         const repoInput = document.getElementById('gh-repo-input');
 
-        // Load existing or fallback
-        tokenInput.value = ghToken;
-        repoInput.value = ghRepo;
-
-        if (!localStorage.getItem('gh_token')) {
-            localStorage.setItem('gh_token', ghToken);
-            localStorage.setItem('gh_repo', ghRepo);
-        }
+        // Load existing
+        tokenInput.value = localStorage.getItem('gh_token') || "";
+        repoInput.value = localStorage.getItem('gh_repo') || "krinsh777/mk-media-group-";
 
         settingsBtn.addEventListener('click', () => settingsModal.style.display = 'flex');
         closeSettings.addEventListener('click', () => settingsModal.style.display = 'none');
 
         saveSettings.addEventListener('click', () => {
-            ghToken = tokenInput.value;
-            ghRepo = repoInput.value;
-            localStorage.setItem('gh_token', ghToken);
-            localStorage.setItem('gh_repo', ghRepo);
+            localStorage.setItem('gh_token', tokenInput.value);
+            localStorage.setItem('gh_repo', repoInput.value);
             settingsModal.style.display = 'none';
             Swal.fire('Saved!', 'Cloud credentials updated successfully.', 'success');
         });
 
         storyForm.addEventListener('submit', async function (e) {
             e.preventDefault();
-            console.log("Publishing with:", ghRepo); // Debug log
+            const ghToken = localStorage.getItem('gh_token');
+            const ghRepo = localStorage.getItem('gh_repo');
 
+            if (!ghToken || !ghRepo) {
+                Swal.fire('Config Missing!', 'Please set your GitHub Token and Repo in Settings first.', 'error');
+                settingsModal.style.display = 'flex';
+                return;
+            }
+
+            const title = document.getElementById('news-title').value;
+            const image = document.getElementById('news-image').value;
+            const content = document.getElementById('news-content').value;
+            const date = new Date().toLocaleDateString('ne-NP');
+
+            if (!image) {
+                Swal.fire('Oops!', 'Please upload or provide an image first.', 'warning');
+                return;
+            }
+
+            const item = { id: Date.now(), title, image, content, date };
             // 1. Show Loading
             Swal.fire({
                 title: 'Publishing to Cloud...',
@@ -703,4 +707,5 @@
 
 
 </html>
+
 
