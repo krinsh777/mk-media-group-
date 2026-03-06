@@ -168,9 +168,9 @@ function updateUIStrings() {
         introPs[1].textContent = t.intro_sub;
     }
 
-    // Update Local News Grid Labels
+    // Update Latest News Grid Labels
     const localTitle = document.querySelector('#local-blog-section .section-title');
-    if (localTitle) localTitle.innerHTML = `<i class="fas fa-feather-alt"></i> ${t.local_title}`;
+    if (localTitle) localTitle.innerHTML = `<i class="fas fa-bolt"></i> ${t.local_title}`;
 
     const localBadge = document.querySelector('.blog-badge');
     if (localBadge) localBadge.textContent = t.new_label;
@@ -348,7 +348,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
     checkUrlForPost();
 
-    // Update local highlights periodically
+    // Update Latest News periodically
     setInterval(loadLocalNews, 300000); // Every 5 minutes
 
     // Preloader Hiding Logic (Advanced)
@@ -501,7 +501,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // Load Local News from LocalStorage then refresh from GitHub
+    // Load Latest News from LocalStorage then refresh from GitHub
     async function loadLocalNews() {
         const grid = document.getElementById('local-news-grid');
         if (!grid) return;
@@ -548,7 +548,7 @@ document.addEventListener('DOMContentLoaded', function () {
             <article class="news-item fade-in-up">
                 <div class="news-image" onclick="openNewsReader(${item.id})">
                     <img referrerpolicy="no-referrer" src="${proxyImage(item.image)}" alt="${item.title}" onerror="this.src='https://via.placeholder.com/400x300?text=Image+Loading...'">
-                    <span class="category-label">${t.local_title}</span>
+                    <span class="category-label"><i class="fas fa-bolt"></i> ${t.local_title}</span>
                 </div>
                 <div class="news-content">
                     <h3><a href="javascript:void(0)" onclick="openNewsReader(${item.id})">${item.title}</a></h3>
