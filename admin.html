@@ -320,7 +320,7 @@
         </div>
 
         <div class="admin-card">
-            <h3><i class="fas fa-tasks"></i> हालका समाचारहरु (Live Archives)</h3>
+            <h3><i class="fas fa-tasks"></i> ताजा समाचारहरु (Latest News)</h3>
             <div id="admin-news-list" style="margin-top: 20px;">
                 <!-- News loaded here -->
             </div>
@@ -420,6 +420,7 @@
             try {
                 // 1. Upload Image to GitHub first
                 if (selectedImageBase64) {
+                    console.log("Preparing photo for cloud storage...");
                     const imgRes = await fetch(`https://api.github.com/repos/${ghRepo}/contents/images/news/${selectedImageName}`, {
                         method: 'PUT',
                         headers: {
@@ -433,7 +434,10 @@
                     });
                     if (!imgRes.ok) {
                         const errData = await imgRes.json();
-                        throw new Error(`GitHub Image Upload Error: ${errData.message} (${imgRes.status})`);
+                        console.error("Cloud Image Upload Failed:", errData);
+                        throw new Error(`Cloud Image Error: ${errData.message} (Check Repository Visibility)`);
+                    } else {
+                        console.log("Image saved to GitHub Cloud Successfully! ✅");
                     }
                 }
 
