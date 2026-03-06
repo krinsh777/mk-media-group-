@@ -103,6 +103,7 @@
             box-shadow: var(--shadow-md);
             border: 1px solid var(--border-color);
             margin-bottom: 30px;
+            -webkit-backdrop-filter: blur(10px);
             backdrop-filter: blur(10px);
         }
 
@@ -327,6 +328,18 @@
     </div>
 
     <script>
+        const ghToken = "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";
+        const ghRepo = "krinsh777/mk-media-group-";
+
+        // Global Image Proxy to handle cross-device synced images
+        function proxyImage(url) {
+            if (!url) return 'images/news-placeholder.jpg';
+            if (typeof url === 'string' && url.startsWith('images/news/')) {
+                return `https://raw.githubusercontent.com/${ghRepo}/main/${url}`;
+            }
+            return url;
+        }
+
         const storyForm = document.getElementById('admin-story-form');
         const newsListGrid = document.getElementById('admin-news-list');
 
@@ -370,13 +383,6 @@
             };
             reader.readAsDataURL(file);
         });
-
-        // --- CLOUD PUBLISHING ENGINE ---
-        const ghToken = "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";
-        const ghRepo = "krinsh777/mk-media-group-";
-
-        // Update inputs visually
-        document.getElementById('gh-token').value = ghToken;
 
         storyForm.addEventListener('submit', async function (e) {
             e.preventDefault();
@@ -488,29 +494,37 @@
 
         // --- STORY LOAD/DELETE LOGIC ---
         async function loadNews() {
-            newsListGrid.innerHTML = '<p style="text-align:center; padding: 40px; color: grey;">Connecting to cloud sync... ⌛</p>';
+            const grid = newsListGrid;
 
-            let list = [];
+            // 1. Show cached data immediately to prevent flickering
+            let currentList = JSON.parse(localStorage.getItem('mk_local_news') || '[]');
+            if (currentList.length > 0) {
+                renderAdminList(currentList);
+            } else {
+                grid.innerHTML = '<p style="text-align:center; padding: 40px; color: grey;">Connecting to cloud sync... ⌛</p>';
+            }
+
+            // 2. Refresh from GitHub
             try {
-                // ALWAYS fetch from GitHub in Admin to ensure cross-device consistency
                 const rawUrl = `https://raw.githubusercontent.com/${ghRepo}/main/data/news.json?v=${Date.now()}`;
                 const res = await fetch(rawUrl);
                 if (res.ok) {
-                    list = await res.json();
-                    localStorage.setItem('mk_local_news', JSON.stringify(list));
-                } else {
-                    list = JSON.parse(localStorage.getItem('mk_local_news') || '[]');
+                    const cloudList = await res.json();
+                    if (JSON.stringify(cloudList) !== JSON.stringify(currentList)) {
+                        localStorage.setItem('mk_local_news', JSON.stringify(cloudList));
+                        renderAdminList(cloudList);
+                    }
                 }
             } catch (e) {
                 console.error("Cloud fetch failed", e);
-                list = JSON.parse(localStorage.getItem('mk_local_news') || '[]');
             }
+        }
 
+        function renderAdminList(list) {
             if (list.length === 0) {
                 newsListGrid.innerHTML = '<p style="text-align:center; padding: 40px; color: grey;">अहिले कुनै समाचार छैन। (Empty feed)</p>';
                 return;
             }
-
             newsListGrid.innerHTML = list.map(item => `
                 <div class="admin-list-item fade-in">
                     <div style="flex: 1; cursor: pointer;" onclick="openNewsReader(${item.id})">
@@ -599,7 +613,7 @@
                 html: `
                     <div class="reader-container">
                         <div class="reader-hero">
-                            <img referrerpolicy="no-referrer" src="${item.image}" alt="${item.title}" onerror="this.src='images/news-placeholder.jpg'">
+                            <img referrerpolicy="no-referrer" src="${proxyImage(item.image)}" alt="${item.title}" onerror="this.src='images/news-placeholder.jpg'">
                             <div class="reader-meta">
                                 <span class="reader-category">LATEST STORY</span>
                                 <h2 class="reader-title">${item.title}</h2>
