@@ -91,7 +91,7 @@ function rebrand(text) {
         .replace(/Tpt/g, "MK Media");
 }
 
-const GH_REPO = 'krinsh777/mk-media-group-'; // Global Repo for cross-device sync
+const GH_REPO = 'krinsh777/mk-media-group--main'; // Correct Global Repo for cross-device sync
 
 // Global Image Proxy to handle hotlink protection and cross-device cloud images
 function proxyImage(url) {
@@ -104,7 +104,7 @@ function proxyImage(url) {
 
     if (url.includes('images/')) return url;
 
-    // Fallback for external images using bridge
+    // Fallback for WP images using bridge
     const cleanUrl = url.replace(/^https?:\/\//, '');
     return `https://i0.wp.com/${cleanUrl}`;
 }
