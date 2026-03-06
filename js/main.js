@@ -194,7 +194,7 @@ async function fetchFeaturedNews() {
                     <article class="main-feature">
                         <div class="featured-image">
                             <span class="trending-badge"><i class="fas fa-fire"></i> ${trendingLabel}</span>
-                            <img src="${mainPost._embedded?.['wp:featuredmedia']?.[0]?.source_url || 'images/featured-1.jpg'}" alt="Featured News">
+                            <img referrerpolicy="no-referrer" src="${mainPost._embedded?.['wp:featuredmedia']?.[0]?.source_url || 'images/featured-1.jpg'}" alt="Featured News">
                             <div class="category-label">${topStoryLabel}</div>
                         </div>
                         <div class="featured-content">
@@ -213,7 +213,7 @@ async function fetchFeaturedNews() {
                     ${secondaryPosts.map(post => `
                         <article class="secondary-feature">
                             <div class="featured-image">
-                                <img src="${post._embedded?.['wp:featuredmedia']?.[0]?.source_url || 'images/featured-2.jpg'}" alt="Secondary News">
+                                <img referrerpolicy="no-referrer" src="${post._embedded?.['wp:featuredmedia']?.[0]?.source_url || 'images/featured-2.jpg'}" alt="Secondary News">
                             </div>
                             <div class="featured-content">
                                 <h3><a href="${post.link}" target="_blank">${rebrand(post.title.rendered)}</a></h3>
@@ -250,7 +250,7 @@ async function fetchCategoryNews(categoryId, gridElement) {
                 return `
                     <article class="news-item">
                         <div class="news-image">
-                            <img src="${imageUrl}" alt="${title}">
+                            <img referrerpolicy="no-referrer" src="${imageUrl}" alt="${title}">
                         </div>
                         <div class="news-content">
                             <h3><a href="${post.link}" target="_blank">${title}</a></h3>
@@ -298,7 +298,7 @@ async function fetchVideoContent() {
                 <div class="sidebar-title">${translations[currentLang].recent_videos}</div>
                 ${posts.map(post => `
                     <div class="sidebar-video-item" onclick="window.open('${post.link}', '_blank')">
-                        <img src="${post._embedded?.['wp:featuredmedia']?.[0]?.source_url || 'images/video-1.jpg'}" alt="Video">
+                        <img referrerpolicy="no-referrer" src="${post._embedded?.['wp:featuredmedia']?.[0]?.source_url || 'images/video-1.jpg'}" alt="Video">
                         <p>${rebrand(post.title.rendered)}</p>
                     </div>
                 `).join('')}
@@ -495,7 +495,7 @@ document.addEventListener('DOMContentLoaded', function () {
         grid.innerHTML = localData.map(item => `
         <article class="news-item">
             <div class="news-image">
-                <img src="${item.image}" alt="${item.title}" onerror="this.src='images/news-placeholder.jpg'">
+                <img referrerpolicy="no-referrer" src="${item.image}" alt="${item.title}" onerror="this.src='images/news-placeholder.jpg'">
             </div>
             <div class="news-content">
                 <span class="category-label">${t.local_title}</span>
@@ -528,7 +528,7 @@ document.addEventListener('DOMContentLoaded', function () {
             html: `
                 <div class="reader-container">
                     <div class="reader-hero">
-                        <img src="${item.image}" alt="${item.title}" onerror="this.src='images/news-placeholder.jpg'">
+                        <img referrerpolicy="no-referrer" src="${item.image}" alt="${item.title}" onerror="this.src='images/news-placeholder.jpg'">
                         <div class="reader-meta">
                             <span class="reader-category">${t.local_title}</span>
                             <h2 class="reader-title">${item.title}</h2>
