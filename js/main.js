@@ -95,11 +95,11 @@ const GH_REPO = 'krinsh777/mk-media-group-'; // Global Repo for cross-device syn
 
 // Global Image Proxy to handle hotlink protection and cross-device cloud images
 function proxyImage(url) {
-    if (!url) return 'images/news-placeholder.jpg';
+    if (!url) return 'https://via.placeholder.com/400x300?text=News+Article';
 
-    // Redirect local news images to jsDelivr for faster cross-device visibility
+    // Redirect local news images to GitHub Raw with cache busting for INSTANT visibility
     if (typeof url === 'string' && url.startsWith('images/news/')) {
-        return `https://cdn.jsdelivr.net/gh/${GH_REPO}@main/${url}`;
+        return `https://raw.githubusercontent.com/${GH_REPO}/main/${url}?v=${Date.now()}`;
     }
 
     if (url.includes('images/')) return url;
@@ -536,17 +536,18 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-    // Helper to render the local grid
+    // Helper to render the local grid without flickering
     function renderLocalGrid(data, container, t) {
         if (!data || data.length === 0) {
             container.innerHTML = `<div class="no-news">${t.no_local}</div>`;
             return;
         }
 
-        container.innerHTML = data.map(item => `
-            <article class="news-item fade-in-up" style="animation: fadeInUp 0.5s ease forwards">
+        // Create a new set of innerHTML to avoid partial re-renders
+        const html = data.map(item => `
+            <article class="news-item fade-in-up">
                 <div class="news-image" onclick="openNewsReader(${item.id})">
-                    <img referrerpolicy="no-referrer" src="${proxyImage(item.image)}" alt="${item.title}" onerror="this.src='images/news-placeholder.jpg'">
+                    <img referrerpolicy="no-referrer" src="${proxyImage(item.image)}" alt="${item.title}" onerror="this.src='https://via.placeholder.com/400x300?text=Image+Loading...'">
                     <span class="category-label">${t.local_title}</span>
                 </div>
                 <div class="news-content">
@@ -560,6 +561,13 @@ document.addEventListener('DOMContentLoaded', function () {
                 </div>
             </article>
         `).join('');
+
+        // Apply HTML ONLY if it's different from current to stop flickering
+        const currentHTML = container.innerHTML;
+        // Strip out some noise to compare content
+        if (currentHTML.replace(/\s+/g, '') !== html.replace(/\s+/g, '')) {
+            container.innerHTML = html;
+        }
     }
 
     // Quick Share from Grid
