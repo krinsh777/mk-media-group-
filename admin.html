@@ -409,10 +409,9 @@
 
             const item = { id: Date.now(), title, image, content, date };
 
-            // 1. Show Loading
             Swal.fire({
                 title: 'Publishing to Cloud...',
-                html: 'Connecting to MK Media Servers 🚀',
+                html: 'Saving photo and article to MK Media... 🚀',
                 allowOutsideClick: false,
                 didOpen: () => { Swal.showLoading(); }
             });
@@ -420,7 +419,7 @@
             try {
                 // 1. Upload Image to GitHub first
                 if (selectedImageBase64) {
-                    console.log("Preparing photo for cloud storage...");
+                    console.log("Saving new photo...");
                     const imgRes = await fetch(`https://api.github.com/repos/${ghRepo}/contents/images/news/${selectedImageName}`, {
                         method: 'PUT',
                         headers: {
@@ -434,16 +433,13 @@
                     });
                     if (!imgRes.ok) {
                         const errData = await imgRes.json();
-                        console.error("Cloud Image Upload Failed:", errData);
-                        throw new Error(`Cloud Image Error: ${errData.message} (Check Repository Visibility)`);
-                    } else {
-                        console.log("Image saved to GitHub Cloud Successfully! ✅");
+                        throw new Error(`Photo Upload Failed: ${errData.message}`);
                     }
                 }
 
-                // 2. Fetch LATEST news list from GitHub to prevent cross-device overwrites
+                // 2. Fetch LATEST news list from GitHub API (NOT Raw URL) to get the correct SHA
                 const fileName = 'data/news.json';
-                const getRes = await fetch(`https://api.github.com/repos/${ghRepo}/contents/${fileName}?v=${Date.now()}`, {
+                const getRes = await fetch(`https://api.github.com/repos/${ghRepo}/contents/${fileName}?t=${Date.now()}`, {
                     headers: { 'Authorization': `token ${ghToken}` }
                 });
 
@@ -454,19 +450,21 @@
                     const fileData = await getRes.json();
                     sha = fileData.sha;
                     try {
-                        // Correctly decode Base64 UTF-8 content from GitHub
-                        const content = decodeURIComponent(escape(atob(fileData.content.replace(/\s/g, ''))));
-                        cloudList = JSON.parse(content);
+                        const decodedContent = decodeURIComponent(escape(atob(fileData.content.replace(/\s/g, ''))));
+                        cloudList = JSON.parse(decodedContent);
                     } catch (e) {
-                        console.error("Error parsing cloud news:", e);
-                        cloudList = []; // Fallback to empty if corrupt
+                        console.error("Cloud JSON corrupted, starting fresh list.");
+                        cloudList = [];
                     }
+                } else if (getRes.status !== 404) {
+                    const err = await getRes.json();
+                    throw new Error(`Could not reach Cloud Data: ${err.message}`);
                 }
 
-                // 3. Add new item to the FRONT of the cloud list
+                // 3. Add new item to the FRONT
                 cloudList.unshift(item);
 
-                // 4. Push updated JSON to GitHub
+                // 4. Update the JSON file
                 const putRes = await fetch(`https://api.github.com/repos/${ghRepo}/contents/${fileName}`, {
                     method: 'PUT',
                     headers: {
@@ -474,23 +472,15 @@
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
-                        message: `Live Update: ${title}`,
+                        message: `Publish: ${title}`,
                         content: btoa(unescape(encodeURIComponent(JSON.stringify(cloudList)))),
                         sha: sha
                     })
                 });
 
                 if (putRes.ok) {
-                    // Update local storage for immediate feedback
                     localStorage.setItem('mk_local_news', JSON.stringify(cloudList));
-
-                    Swal.fire({
-                        title: 'Success!',
-                        text: 'Your story is now LIVE globally! 🚀',
-                        icon: 'success',
-                        confirmButtonColor: 'var(--primary-color)'
-                    });
-
+                    Swal.fire('Success!', 'Post is now LIVE!', 'success');
                     storyForm.reset();
                     uploadStatus.textContent = "No photo selected";
                     hiddenImageUrl.value = "";
@@ -500,38 +490,37 @@
                     loadNews();
                 } else {
                     const err = await putRes.json();
-                    throw new Error(err.message);
+                    throw new Error(`Publish Error: ${err.message}`);
                 }
             } catch (e) {
-                Swal.fire('Cloud Sync Error', e.message, 'error');
+                console.error("Admin Error:", e);
+                Swal.fire('Error ❌', e.message, 'error');
             }
         });
 
         // --- STORY LOAD/DELETE LOGIC ---
         async function loadNews() {
             const grid = newsListGrid;
-
-            // 1. Show cached data immediately to prevent flickering
             let currentList = JSON.parse(localStorage.getItem('mk_local_news') || '[]');
             if (currentList.length > 0) {
                 renderAdminList(currentList);
-            } else {
-                grid.innerHTML = '<p style="text-align:center; padding: 40px; color: grey;">Connecting to cloud sync... ⌛</p>';
             }
 
-            // 2. Refresh from GitHub
             try {
-                const rawUrl = `https://raw.githubusercontent.com/${ghRepo}/main/data/news.json?v=${Date.now()}`;
-                const res = await fetch(rawUrl);
+                // Always get the latest directly from API to avoid caching issues during admin work
+                const res = await fetch(`https://api.github.com/repos/${ghRepo}/contents/data/news.json?t=${Date.now()}`, {
+                    headers: { 'Authorization': `token ${ghToken}` }
+                });
+
                 if (res.ok) {
-                    const cloudList = await res.json();
-                    if (JSON.stringify(cloudList) !== JSON.stringify(currentList)) {
-                        localStorage.setItem('mk_local_news', JSON.stringify(cloudList));
-                        renderAdminList(cloudList);
-                    }
+                    const fileData = await res.json();
+                    const decoded = decodeURIComponent(escape(atob(fileData.content.replace(/\s/g, ''))));
+                    const cloudList = JSON.parse(decoded);
+                    localStorage.setItem('mk_local_news', JSON.stringify(cloudList));
+                    renderAdminList(cloudList);
                 }
             } catch (e) {
-                console.error("Cloud fetch failed", e);
+                console.error("Update failed:", e);
             }
         }
 
@@ -561,37 +550,31 @@
 
         async function deleteStory(id) {
             const { isConfirmed } = await Swal.fire({
-                title: 'Delete Story?',
-                text: "This story will be removed from all devices globally!",
+                title: 'Delete Permanently?',
+                text: "Removing this post from global storage...",
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonColor: '#d33',
-                confirmButtonText: 'Yes, Delete Globally'
+                confirmButtonText: 'Yes, Delete'
             });
 
             if (isConfirmed) {
-                Swal.fire({ title: 'Syncing Deletion...', didOpen: () => Swal.showLoading() });
+                Swal.fire({ title: 'Deleting...', didOpen: () => Swal.showLoading() });
 
                 try {
-                    // 1. Fetch LATEST news list from GitHub first
                     const fileName = 'data/news.json';
-                    const getRes = await fetch(`https://api.github.com/repos/${ghRepo}/contents/${fileName}?v=${Date.now()}`, {
+                    const getRes = await fetch(`https://api.github.com/repos/${ghRepo}/contents/${fileName}?t=${Date.now()}`, {
                         headers: { 'Authorization': `token ${ghToken}` }
                     });
 
-                    if (!getRes.ok) throw new Error("Could not fetch latest news from cloud.");
+                    if (!getRes.ok) throw new Error("Could not retrieve latest database for deletion.");
 
                     const fileData = await getRes.json();
-                    const sha = fileData.sha;
+                    const decoded = decodeURIComponent(escape(atob(fileData.content.replace(/\s/g, ''))));
+                    let cloudList = JSON.parse(decoded);
 
-                    // Decode content
-                    const content = decodeURIComponent(escape(atob(fileData.content.replace(/\s/g, ''))));
-                    let cloudList = JSON.parse(content);
-
-                    // 2. Filter out the deleted item from the CLOUD list
                     cloudList = cloudList.filter(it => it.id !== id);
 
-                    // 3. Update GitHub JSON
                     const putRes = await fetch(`https://api.github.com/repos/${ghRepo}/contents/${fileName}`, {
                         method: 'PUT',
                         headers: {
@@ -599,22 +582,22 @@
                             'Content-Type': 'application/json'
                         },
                         body: JSON.stringify({
-                            message: `Delete Story ID: ${id}`,
+                            message: `Delete post: ${id}`,
                             content: btoa(unescape(encodeURIComponent(JSON.stringify(cloudList)))),
-                            sha: sha
+                            sha: fileData.sha
                         })
                     });
 
                     if (putRes.ok) {
                         localStorage.setItem('mk_local_news', JSON.stringify(cloudList));
-                        await loadNews();
-                        Swal.fire('Deleted!', 'Story removed from cloud.', 'success');
+                        loadNews();
+                        Swal.fire('Removed!', 'Post deleted from all devices.', 'success');
                     } else {
                         const err = await putRes.json();
-                        throw new Error(err.message || "Failed to update cloud list.");
+                        throw new Error(`Deletion Error: ${err.message}`);
                     }
                 } catch (e) {
-                    Swal.fire('Sync Error', e.message, 'error');
+                    Swal.fire('Error ❌', e.message, 'error');
                 }
             }
         }
